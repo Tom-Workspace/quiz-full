@@ -1,0 +1,11 @@
+src/app/auth/login/page.tsx
+src/app/auth/register/page.tsx
+src/app/dashboard/page.tsx
+src/components/layout/Navbar.tsx
+src/contexts/AuthContext.tsx
+src/lib/api.ts
+src/lib/socket.ts
+*.js
+*.jsx
+*.ts
+*.tsx
