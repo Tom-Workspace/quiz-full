@@ -6,7 +6,7 @@ const answerSchema = new mongoose.Schema({
     required: true
   },
   answer: {
-    type: mongoose.Schema.Types.Mixed, // Can be string, array, or object
+    type: mongoose.Schema.Types.Mixed,
     required: true
   },
   isCorrect: {
@@ -18,7 +18,7 @@ const answerSchema = new mongoose.Schema({
     default: 0
   },
   timeSpent: {
-    type: Number, // in seconds
+    type: Number,
     default: 0
   },
   answeredAt: {
@@ -61,6 +61,11 @@ const quizAttemptSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // ✅ NEW: هل الطالب نجح في الكويز (بناءً على passingScore)
+  isPassed: {
+    type: Boolean,
+    default: false
+  },
   startedAt: {
     type: Date,
     default: Date.now
@@ -69,7 +74,7 @@ const quizAttemptSchema = new mongoose.Schema({
     type: Date
   },
   timeSpent: {
-    type: Number, // in seconds
+    type: Number,
     default: 0
   },
   currentQuestionIndex: {
@@ -96,20 +101,15 @@ const quizAttemptSchema = new mongoose.Schema({
   }]
 });
 
-// Compound index for unique attempts per student per quiz
 quizAttemptSchema.index({ quiz: 1, student: 1, attemptNumber: 1 }, { unique: true });
-
-// Index for better query performance
 quizAttemptSchema.index({ student: 1 });
 quizAttemptSchema.index({ quiz: 1 });
 quizAttemptSchema.index({ status: 1 });
 quizAttemptSchema.index({ createdAt: -1 });
 
-// Update updatedAt field before saving
 quizAttemptSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   
-  // Calculate percentage if score and totalPoints are available
   if (this.totalPoints > 0) {
     this.percentage = Math.round((this.score / this.totalPoints) * 100);
   }
@@ -117,7 +117,6 @@ quizAttemptSchema.pre('save', function(next) {
   next();
 });
 
-// Calculate time spent when completing
 quizAttemptSchema.pre('save', function(next) {
   if (this.status === 'completed' && !this.completedAt) {
     this.completedAt = new Date();
@@ -126,7 +125,6 @@ quizAttemptSchema.pre('save', function(next) {
   next();
 });
 
-// Static method to get student's best attempt for a quiz
 quizAttemptSchema.statics.getBestAttempt = function(quizId, studentId) {
   return this.findOne({
     quiz: quizId,
@@ -135,7 +133,6 @@ quizAttemptSchema.statics.getBestAttempt = function(quizId, studentId) {
   }).sort({ score: -1, completedAt: 1 });
 };
 
-// Static method to get attempt count for a student on a quiz
 quizAttemptSchema.statics.getAttemptCount = function(quizId, studentId) {
   return this.countDocuments({
     quiz: quizId,

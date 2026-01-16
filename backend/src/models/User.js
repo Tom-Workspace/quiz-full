@@ -27,6 +27,14 @@ const userSchema = new mongoose.Schema({
     },
     match: [/^01[0-9]{9}$/, 'Please enter a valid Egyptian phone number']
   },
+  // ✅ NEW: السنة الدراسية للطالب
+  academicYear: {
+    type: String,
+    enum: ['first-secondary', 'second-secondary', 'third-secondary'],
+    required: function() {
+      return this.role === 'student';
+    }
+  },
   password: {
     type: String,
     required: [true, 'Password is required'],
@@ -68,6 +76,8 @@ userSchema.index({ phone: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ isApproved: 1 });
 userSchema.index({ isOnline: 1 });
+// ✅ NEW: Index للسنة الدراسية
+userSchema.index({ academicYear: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
@@ -104,4 +114,3 @@ userSchema.methods.toJSON = function() {
 };
 
 module.exports = mongoose.model('User', userSchema);
-

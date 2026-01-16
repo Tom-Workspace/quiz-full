@@ -69,6 +69,18 @@ const quizSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  // ✅ NEW: ربط الكويز بكورس معين (optional للكويزات القديمة)
+  course: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course',
+    default: null
+  },
+  // ✅ NEW: ربط الكويز بفصل معين (optional للكويزات القديمة)
+  chapter: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Chapter',
+    default: null
+  },
   questions: [questionSchema],
   settings: {
     startDate: {
@@ -88,6 +100,13 @@ const quizSchema = new mongoose.Schema({
       type: Number,
       default: 1,
       min: 1
+    },
+    // ✅ NEW: النسبة المطلوبة للنجاح في الكويز
+    passingScore: {
+      type: Number,
+      default: 60,
+      min: 0,
+      max: 100
     },
     showAnswers: {
       type: String,
@@ -131,6 +150,9 @@ quizSchema.index({ createdBy: 1 });
 quizSchema.index({ 'settings.startDate': 1, 'settings.endDate': 1 });
 quizSchema.index({ isActive: 1 });
 quizSchema.index({ createdAt: -1 });
+// ✅ NEW: Indexes للربط بالكورسات والفصول
+quizSchema.index({ course: 1 });
+quizSchema.index({ chapter: 1 });
 
 // Virtual for checking if quiz is currently active
 quizSchema.virtual('isCurrentlyActive').get(function() {
